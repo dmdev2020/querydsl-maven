@@ -1,0 +1,1 @@
+# querydsl-maven
