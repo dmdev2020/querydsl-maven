@@ -43,7 +43,7 @@ class UserTest {
             session.persist(user);
             assertNotNull(user.getId());
 
-            session.getTransaction().commit();
+            session.getTransaction().rollback();
         }
     }
 
@@ -71,7 +71,39 @@ class UserTest {
             assertThat(companies).hasSize(2);
             assertThat(companies.stream().map(Company::getName)).contains("Meta", "Amazon");
 
-            session.getTransaction().commit();
+            session.getTransaction().rollback();
+        }
+    }
+
+    @Test
+    void checkJpaModelGen() {
+        try (var session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            session.persist(Company.builder()
+                    .name("Google")
+                    .build());
+            session.persist(Company.builder()
+                    .name("Meta")
+                    .build());
+            session.persist(Company.builder()
+                    .name("Amazon")
+                    .build());
+
+            var cb = session.getCriteriaBuilder();
+
+            var criteria = cb.createQuery(Company.class);
+            var company = criteria.from(Company.class);
+
+            criteria.select(company)
+                    .where(cb.like(company.get(Company_.name),"%a%"));
+
+            List<Company> companies = session.createQuery(criteria).getResultList();
+
+            assertThat(companies).hasSize(2);
+            assertThat(companies.stream().map(Company::getName)).contains("Meta", "Amazon");
+
+            session.getTransaction().rollback();
         }
     }
 
