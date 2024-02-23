@@ -12,47 +12,49 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <lombok.version>1.18.22</lombok.version>
-        <junit5.version>5.8.2</junit5.version>
+        <lombok.version>1.18.28</lombok.version>
+        <junit5.version>5.10.0</junit5.version>
         <querydsl.version>5.0.0</querydsl.version>
-        <!-- Querydsl 5.0.0 uses javax, so we have to use Hibernate 5 so far (Hibernate 6 uses jakarta) -->
-        <hibernate.version>5.6.8.Final</hibernate.version>
-        <hibernate.jpamodelgen.version>5.6.8.Final</hibernate.jpamodelgen.version>
-        <javax.persistence-api>2.2</javax.persistence-api>
+        <postgresql.version>42.6.0</postgresql.version>
+        <assertj.version>3.24.2</assertj.version>
+        <h2.version>2.2.222</h2.version>
+        <hibernate.version>6.3.0.Final</hibernate.version>
+        <jakarta.version>3.1.0</jakarta.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
         </dependency>
         <!-- This model is used by criteria api -->
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jpamodelgen</artifactId>
-            <version>${hibernate.jpamodelgen.version}</version>
+            <version>${hibernate.version}</version>
             <scope>provided</scope>
         </dependency>
-
 
         <!-- querydsl jpa requires 2 dependencies -->
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
             <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
             <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
         </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.3.3</version>
+            <version>${postgresql.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -66,13 +68,13 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.22.0</version>
+            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.1.210</version>
+            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -88,40 +90,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-wrapper-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.2.0</version>
             </plugin>
             <plugin>
-                <groupId>com.querydsl</groupId>
-                <artifactId>querydsl-maven-plugin</artifactId>
-                <version>5.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>jpa-export</goal>
-                        </goals>
-                        <configuration>
-                            <targetFolder>target/generated-sources/java</targetFolder>
-                            <!-- You have to pass your entity package here -->
-                            <packages>
-                                <package>com.dmdev.querydsl.entity</package>
-                            </packages>
-                        </configuration>
-                    </execution>
-                </executions>
-                <!-- querydsl plugin does not contain javax lib for generating jpa model -->
-                <dependencies>
-                    <dependency>
-                        <groupId>javax.persistence</groupId>
-                        <artifactId>javax.persistence-api</artifactId>
-                        <version>${javax.persistence-api}</version>
-                    </dependency>
-                </dependencies>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>3.11.0</version>
                 <configuration>
                     <annotationProcessors>
                         <annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor</annotationProcessor>
@@ -138,16 +117,12 @@
                             <groupId>com.querydsl</groupId>
                             <artifactId>querydsl-apt</artifactId>
                             <version>${querydsl.version}</version>
+                            <classifier>jakarta</classifier>
                         </path>
                         <path>
-                            <groupId>org.hibernate</groupId>
+                            <groupId>org.hibernate.orm</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>${hibernate.jpamodelgen.version}</version>
-                        </path>
-                        <path>
-                            <groupId>javax.persistence</groupId>
-                            <artifactId>javax.persistence-api</artifactId>
-                            <version>${javax.persistence-api}</version>
+                            <version>${hibernate.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
